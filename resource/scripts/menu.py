@@ -15,7 +15,7 @@ import ftrack_connect_pipeline_nuke
 import sys
 import traceback
 
-logger = logging.getLogger('ftrack_connect_pipeline_nuke.scripts.userSetup')
+logger = logging.getLogger('ftrack_connect_pipeline_nuke.scripts.menu')
 
 
 def initialise():

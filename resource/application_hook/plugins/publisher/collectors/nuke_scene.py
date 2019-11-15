@@ -10,7 +10,10 @@ class CollectNukeScenePlugin(plugin.CollectorNukePlugin):
     plugin_name = 'nukescene'
 
     def run(self, context=None, data=None, options=None):
-        return [nuke.root().knob('name').value()]
+        print "Entring at nuke_scene"
+        sceneName = nuke.root().knob('name').value()
+        print "This is the scene name val ---> ", sceneName
+        return [r'C:/Users/lluisFtrack/work/brokenC/ftrack/storageLocation/nukescene.nk']
 
 
 def register(api_object, **kw):

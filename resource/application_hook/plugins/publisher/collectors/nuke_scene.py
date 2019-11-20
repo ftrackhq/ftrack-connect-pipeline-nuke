@@ -13,7 +13,7 @@ class CollectNukeScenePlugin(plugin.CollectorNukePlugin):
         print "Entring at nuke_scene"
         sceneName = nuke.root().knob('name').value()
         print "This is the scene name val ---> ", sceneName
-        return [r'C:/Users/lluisFtrack/work/brokenC/ftrack/storageLocation/nukescene.nk']
+        return [sceneName]
 
 
 def register(api_object, **kw):

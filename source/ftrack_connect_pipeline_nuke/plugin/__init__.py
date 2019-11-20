@@ -9,6 +9,8 @@ import traceback
 from ftrack_connect_pipeline import plugin
 from ftrack_connect_pipeline import constants
 from ftrack_connect_pipeline_nuke import constants as nuke_constants
+#from ftrack_connect_pipeline.mainThreadEngine import MainThreadEngine
+from ftrack_connect_pipeline.utils import MainThreadWorker
 
 import nuke
 
@@ -18,9 +20,11 @@ class _BaseNuke(plugin._Base):
 
     def _run(self, event):
         super_fn = super(_BaseNuke, self)._run
-        result = nuke.executeInMainThreadWithResult(
+        mThreadWorker = MainThreadWorker()
+        result = mThreadWorker.execute_in_main_thread(super_fn, event)
+        '''result = nuke.executeInMainThreadWithResult(
             super_fn, args=(event)
-        )
+        )'''
         return result
 
 

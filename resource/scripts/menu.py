@@ -13,6 +13,7 @@ import ftrack_api
 import nuke
 
 from ftrack_connect_pipeline.configure_logging import configure_logging
+
 configure_logging(
     'ftrack_connect_pipeline_nuke',
     extra_modules=['ftrack_connect_pipeline', 'ftrack_connect_pipeline_qt']
@@ -35,6 +36,39 @@ def get_ftrack_menu(menu_name = 'ftrack', submenu_name = 'pipeline'):
 
     return ftrack_sub_menu
 
+def script_init():
+    # Setup script with fps and frame range from ftrack
+
+    nuke.removeOnUserCreate(script_init)
+    
+    fps = str(os.getenv('FPS'))
+
+    if not fps is None and 0 < len(fps):
+
+        fps_float = float(fps)
+
+        nuke.tprint('Setting current fps to: {0}'.format(fps_float))
+        nuke.root().knob("fps").setValue(fps_float)
+    else:
+        nuke.tprint('No fps supplied!')
+
+    # Set animation timeline
+
+    start = os.getenv('FS')
+    end = os.getenv('FE')
+
+    if not start is None and 0 < len(start) and not end is None and 0 < len(end):
+        start_int = int(float(start))
+        end_int = int(float(end))
+
+        nuke.tprint('Setting script timeline to {0}-{1}'.format(
+            start_int, end_int))
+        nuke.root().knob("lock_range").setValue(False)
+        nuke.root().knob("first_frame").setValue(start_int)
+        nuke.root().knob("last_frame").setValue(end_int)
+        nuke.root().knob("lock_range").setValue(True)
+    else:
+        nuke.tprint('No timeline start and/or end supplied!')
 
 def initialise():
     # TODO : later we need to bring back here all the nuke initialiations
@@ -52,5 +86,6 @@ def initialise():
 
     build_menu_widgets(ftrack_menu, event_manager)
 
+    nuke.addOnUserCreate(script_init)
 
 initialise()

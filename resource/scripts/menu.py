@@ -40,7 +40,7 @@ def script_init():
     # Setup script with fps and frame range from ftrack
 
     nuke.removeOnUserCreate(script_init)
-    
+
     fps = str(os.getenv('FPS'))
 
     if not fps is None and 0 < len(fps):
@@ -71,8 +71,6 @@ def script_init():
         nuke.tprint('No timeline start and/or end supplied!')
 
 def initialise():
-    # TODO : later we need to bring back here all the nuke initialiations
-    #  from ftrack-connect-nuke such as frame start / end etc....
 
     logger.debug('Setting up the menu')
     session = ftrack_api.Session(auto_connect_event_hub=False)

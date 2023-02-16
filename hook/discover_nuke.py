@@ -39,8 +39,15 @@ def on_launch_nuke_pipeline(session, event):
     definitions_plugin_hook = os.getenv("FTRACK_DEFINITION_PLUGIN_PATH")
     plugin_hook = os.path.join(definitions_plugin_hook, 'nuke', 'python')
 
+    nuke_definitions_path = os.path.join(
+        plugin_base_dir, 'resource', 'definitions'
+    )
+
     pipeline_nuke_base_data['integration']['env'] = {
-        'FTRACK_EVENT_PLUGIN_PATH.prepend': plugin_hook,
+        'FTRACK_EVENT_PLUGIN_PATH.prepend': os.path.pathsep.join(
+            [plugin_hook, nuke_definitions_path]
+        ),
+        'FTRACK_DEFINITION_PATH.prepend': nuke_definitions_path,
         'PYTHONPATH.prepend': os.path.pathsep.join(
             [python_dependencies, nuke_script_path]
         ),

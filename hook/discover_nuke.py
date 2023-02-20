@@ -44,8 +44,15 @@ def on_launch_nuke_pipeline(session, event):
 
     nuke_bootstrap_plugin_path = os.path.join(nuke_bootstrap_path, 'plugins')
 
+    nuke_definitions_path = os.path.join(
+        plugin_base_dir, 'resource', 'definitions'
+    )
+
     pipeline_nuke_base_data['integration']['env'] = {
-        'FTRACK_EVENT_PLUGIN_PATH.prepend': nuke_plugins_path,
+        'FTRACK_EVENT_PLUGIN_PATH.prepend': os.path.pathsep.join(
+            [nuke_plugins_path, nuke_definitions_path]
+        ),
+        'FTRACK_DEFINITION_PATH.prepend': nuke_definitions_path,
         'PYTHONPATH.prepend': os.path.pathsep.join(
             [python_dependencies, nuke_bootstrap_path]
         ),

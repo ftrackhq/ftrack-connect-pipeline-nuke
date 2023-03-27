@@ -11,6 +11,7 @@ import ftrack_api
 
 from ftrack_connect_pipeline_qt.plugin.widget import BaseOptionsWidget
 from ftrack_connect_pipeline_qt.ui.utility.widget import dialog
+from ftrack_connect_pipeline_qt.ui.utility.widget import radio_button_group, browse_widget
 from ftrack_connect_pipeline_nuke import plugin
 
 
@@ -136,76 +137,13 @@ class NukeSequencePublisherCollectorOptionsWidget(BaseOptionsWidget):
         '''Build the collector widget'''
         super(NukeSequencePublisherCollectorOptionsWidget, self).build()
 
-        bg = QtWidgets.QButtonGroup(self)
-
-        # Render section
-
-        self._render_rb = QtWidgets.QRadioButton(
-            'Render image sequence from script'
-        )
-        bg.addButton(self._render_rb)
-        self.layout().addWidget(self._render_rb)
-
-        self._render_widget = QtWidgets.QWidget()
-        self._render_widget.setLayout(QtWidgets.QVBoxLayout())
-        self._render_widget.layout().setContentsMargins(15, 0, 0, 0)
-        self._render_widget.layout().setSpacing(2)
-
-        bg2 = QtWidgets.QButtonGroup(self)
-
-        self._render_create_write_rb = QtWidgets.QRadioButton(
-            'Create write node at selected node:'
-        )
-        bg2.addButton(self._render_create_write_rb)
-        self._render_widget.layout().addWidget(self._render_create_write_rb)
-
+        self.rbg = radio_button_group.RadioButtonGroup()
         self._nodes_cb = QtWidgets.QComboBox()
-        self._render_widget.layout().addWidget(self._nodes_cb)
-
-        self._render_selected_rb = QtWidgets.QRadioButton(
-            'Render selected node:'
-        )
-        bg2.addButton(self._render_selected_rb)
-        self._render_widget.layout().addWidget(self._render_selected_rb)
-
+        self.rbg.add_button('render_create_write', 'Create write node at selected node:', self._nodes_cb)
         self._write_nodes_cb = QtWidgets.QComboBox()
-        self._render_widget.layout().addWidget(self._write_nodes_cb)
-
-        self._render_warning = QtWidgets.QLabel()
-        self._render_warning.setVisible(False)
-        self._render_widget.layout().addWidget(self._render_warning)
-
-        self.layout().addWidget(self._render_widget)
-
-        # Pick up already rendered media
-        self._pickup_rb = QtWidgets.QRadioButton(
-            'Pick up rendered image sequence:'
-        )
-        bg.addButton(self._pickup_rb)
-        self.layout().addWidget(self._pickup_rb)
-
-        self._browse_image_sequence_path_widget = QtWidgets.QWidget()
-        self._browse_image_sequence_path_widget.setLayout(
-            QtWidgets.QHBoxLayout()
-        )
-        self._browse_image_sequence_path_widget.layout().setContentsMargins(
-            15, 0, 0, 0
-        )
-        self._browse_image_sequence_path_widget.layout().setSpacing(0)
-
-        self._image_sequence_path_le = QtWidgets.QLineEdit()
-
-        self._browse_image_sequence_path_widget.layout().addWidget(
-            self._image_sequence_path_le, 20
-        )
-
-        self._browse_image_sequence_path_btn = QtWidgets.QPushButton('BROWSE')
-        self._browse_image_sequence_path_btn.setObjectName('borderless')
-
-        self._browse_image_sequence_path_widget.layout().addWidget(
-            self._browse_image_sequence_path_btn
-        )
-        self.layout().addWidget(self._browse_image_sequence_path_widget)
+        self.rbg.add_button('render_selected', 'Render selected node:', self._write_nodes_cb)
+        self._browse_widget = browse_widget.BrowseWidget()
+        self.rbg.add_button('pickup', 'Pick up rendered image sequence:', self.browse_widget)
 
         # Use supplied value from definition if available
         if self.options.get('image_sequence_path'):
@@ -215,52 +153,6 @@ class NukeSequencePublisherCollectorOptionsWidget(BaseOptionsWidget):
             self.set_option_result(
                 'render_create_write', 'mode'
             )  # Set default mode
-        mode = self.options['mode'].lower()
-        if mode == 'pickup':
-            self._pickup_rb.setChecked(True)
-            self._render_create_write_rb.setChecked(True)
-        else:
-            self._render_rb.setChecked(True)
-            if mode == 'render_create_write':
-                self._render_create_write_rb.setChecked(True)
-            elif mode == 'render_selected':
-                self._render_selected_rb.setChecked(True)
-            else:
-                # Fall back to create write
-                self._render_create_write_rb.setChecked(True)
-
-        self.report_input()
-
-    def _on_node_selected(self, node_name):
-        '''Callback when node is selected in either on of the combo boxes.'''
-        if not node_name:
-            if 'node_name' in self.options:
-                del self.options['node_name']
-            return
-        self.set_option_result(node_name, 'node_name')
-
-    def _update_render_mode(self):
-        '''Update widget based on selected render mode'''
-        mode = None
-        node_name = None
-        if self._pickup_rb.isChecked():
-            mode = 'pickup'
-        elif self._render_create_write_rb.isChecked():
-            mode = 'render_create_write'
-            node_name = self._nodes_cb.currentText()
-        elif self._render_selected_rb.isChecked():
-            mode = 'render_selected'
-            node_name = self._write_nodes_cb.currentText()
-
-        self.set_option_result(mode, 'mode')
-
-        self._nodes_cb.setVisible(mode == 'render_create_write')
-        self._write_nodes_cb.setVisible(mode == 'render_selected')
-        self._render_widget.setVisible(
-            mode in ['render_create_write', 'render_selected']
-        )
-        self._browse_image_sequence_path_widget.setVisible(mode == 'pickup')
-        self._on_node_selected(node_name)
 
         self.report_input()
 
@@ -270,17 +162,27 @@ class NukeSequencePublisherCollectorOptionsWidget(BaseOptionsWidget):
         self._nodes_cb.currentTextChanged.connect(self._on_node_selected)
         self._write_nodes_cb.currentTextChanged.connect(self._on_node_selected)
 
-        self._render_rb.clicked.connect(self._update_render_mode)
-        self._render_create_write_rb.clicked.connect(self._update_render_mode)
-        self._render_selected_rb.clicked.connect(self._update_render_mode)
-
-        self._pickup_rb.clicked.connect(self._update_render_mode)
+        self.rbg.option_changed.connect(self.set_mode)
 
         self._browse_image_sequence_path_btn.clicked.connect(
             self._show_image_sequence_dialog
         )
 
-        self._update_render_mode()
+        self.rbg.set_default(self.options['mode'].lower())
+
+    def set_mode(self, mode_name, widget, inner_widget):
+        self.set_option_result(mode_name, 'mode')
+        if inner_widget in [self._nodes_cb, self._write_nodes_cb]:
+            self._on_node_selected(inner_widget.currentText())
+        self.report_input()
+
+    def _on_node_selected(self, node_name):
+        '''Callback when node is selected in either on of the combo boxes.'''
+        if not node_name:
+            if 'node_name' in self.options:
+                del self.options['node_name']
+            return
+        self.set_option_result(node_name, 'node_name')
 
     def on_fetch_callback(self, result):
         '''This function is called by the _set_internal_run_result function of

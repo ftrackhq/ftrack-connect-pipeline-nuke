@@ -38,7 +38,10 @@ class NukeSequencePublisherCollectorPlugin(
                 selected_nodes
             ))
 
-        node_names = []
+        node_names = {
+            'write_nodes': [],
+            'all_nodes': []
+        }
         for node in selected_nodes:
             # Determine if is a compatible write node
             if (
@@ -49,13 +52,15 @@ class NukeSequencePublisherCollectorPlugin(
             ):
                 node_file_path = node.knob('file').value()
                 if os.path.splitext(node_file_path.lower())[-1] in self.supported_file_formats:
-                    node_names.append(node.name())
+                    node_names['write_nodes'].append(node.name())
+            node_names['all_nodes'].append(node.name())
         return node_names
 
     def run(self, context_data=None, data=None, options=None):
         '''Build collected objects based on *options*'''
         mode = options['mode']
         result = None
+
         if mode in ['render_selected', 'render_create_write']:
             node_name = options.get('node_name')
             result = {

@@ -187,7 +187,7 @@
           "plugins":[
             {
               "name": "Collect movie",
-              "plugin": "nuke_reviewable_publisher_collector",
+              "plugin": "nuke_movie_publisher_collector",
               "widget": "nuke_movie_publisher_collector"
             }
           ]

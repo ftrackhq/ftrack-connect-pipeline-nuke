@@ -17,9 +17,9 @@ class NukeSequencePublisherCollectorPlugin(
     plugin_name = 'nuke_sequence_publisher_collector'
 
     supported_file_formats = [
-        "cin", "dng", "dpx", "dtex", "gif", "bmp", "float", "pcx", "png", "psd",
-        "tga", "jpeg", "jpg", "exr", "dds", "hdr", "hdri", "cgi", "tif", "tiff",
-        "tga", "targa", "yuv"
+        ".cin", ".dng", ".dpx", ".dtex", ".gif", ".bmp", ".float", ".pcx",
+        ".png", ".psd", ".tga", ".jpeg", ".jpg", ".exr", ".dds", ".hdr",
+        ".hdri", ".cgi", ".tif", ".tiff", ".tga", ".targa", ".yuv"
     ]
 
     def fetch(self, context_data=None, data=None, options=None):
@@ -33,27 +33,13 @@ class NukeSequencePublisherCollectorPlugin(
 
         # filter selected_nodes to match classname given by options
         if options.get('classname'):
-            selected_nodes = list(filter(
-                lambda x: x.Class().find(options['classname']) != -1,
-                selected_nodes
-            ))
+            selected_nodes = self.filter_by_class_name(
+                selected_nodes,
+                options.get('classname')
+            )
 
-        node_names = {
-            'write_nodes': [],
-            'all_nodes': []
-        }
-        for node in selected_nodes:
-            # Determine if is a compatible write node
-            if (
-                node.Class() == 'Write'
-                and node.knob('file')
-                and node.knob('first')
-                and node.knob('last')
-            ):
-                node_file_path = node.knob('file').value()
-                if os.path.splitext(node_file_path.lower())[-1] in self.supported_file_formats:
-                    node_names['write_nodes'].append(node.name())
-            node_names['all_nodes'].append(node.name())
+        node_names = self.classify_supported_write_nodes(selected_nodes)
+
         return node_names
 
     def run(self, context_data=None, data=None, options=None):

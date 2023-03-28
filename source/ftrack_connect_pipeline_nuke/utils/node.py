@@ -53,7 +53,8 @@ def clean_selection():
     for node in nuke.selectedNodes():
         node['selected'].setValue(False)
 
-def get_path_from_write_node(node_name):
+
+def get_path_from_image_sequence_write_node(node_name):
     ''' Extract path from the write node '''
     full_path = None
     if not node_name:

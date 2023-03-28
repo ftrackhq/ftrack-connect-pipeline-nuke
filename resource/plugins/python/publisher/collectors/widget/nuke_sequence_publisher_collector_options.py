@@ -1,17 +1,13 @@
 # :coding: utf-8
 # :copyright: Copyright (c) 2014-2023 ftrack
 import os
-from ftrack_connect_pipeline import utils as core_utils
-
-import nuke
-
-from Qt import QtWidgets
 
 import ftrack_api
 
 from ftrack_connect_pipeline_qt.plugin.widget import BaseOptionsWidget
-from ftrack_connect_pipeline_qt.ui.utility.widget import dialog
-from ftrack_connect_pipeline_qt.ui.utility.widget import radio_button_group, browse_widget, node_combo_box
+from ftrack_connect_pipeline_qt.ui.utility.widget import (
+    radio_button_group, browse_widget, node_combo_box, file_dialog
+)
 from ftrack_connect_pipeline_nuke import plugin
 from ftrack_connect_pipeline_nuke import utils as nuke_utils
 
@@ -46,8 +42,8 @@ class NukeSequencePublisherCollectorOptionsWidget(BaseOptionsWidget):
             report_message = 'No image sequence selected'
 
         # Update UI
-        self._browse_widget.setPath(image_sequence_path)
-        self._browse_widget.setToolTip(image_sequence_path)
+        self._browse_widget.set_path(image_sequence_path)
+        self._browse_widget.set_tool_tip(image_sequence_path)
 
         self.inputChanged.emit(
             {
@@ -92,7 +88,7 @@ class NukeSequencePublisherCollectorOptionsWidget(BaseOptionsWidget):
         node_name = None
         if not self._node_name and self.write_node_names:
             node_name = self.write_node_names[0]
-        self.image_sequence_path = nuke_utils.get_path_from_write_node(node_name)
+        self.image_sequence_path = nuke_utils.get_path_from_image_sequence_write_node(node_name)
 
     def __init__(
         self,
@@ -154,7 +150,6 @@ class NukeSequencePublisherCollectorOptionsWidget(BaseOptionsWidget):
                 'render_create_write', 'mode'
             )  # Set default mode
 
-        #self.report_input()
 
     def post_build(self):
         super(NukeSequencePublisherCollectorOptionsWidget, self).post_build()
@@ -180,7 +175,16 @@ class NukeSequencePublisherCollectorOptionsWidget(BaseOptionsWidget):
         self.set_option_result(mode_name, 'mode')
         if inner_widget in [self._nodes_cb, self._write_nodes_cb]:
             self._on_node_selected(inner_widget.get_text())
-        #self.report_input()
+        else:
+            if not self.image_sequence_path:
+                report_status = False
+                report_message = 'No image sequence selected'
+                self.inputChanged.emit(
+                    {
+                        'status': report_status,
+                        'message': report_message,
+                    }
+                )
 
     def _on_node_selected(self, node_name):
         '''Callback when node is selected in either on of the combo boxes.'''
@@ -217,68 +221,16 @@ class NukeSequencePublisherCollectorOptionsWidget(BaseOptionsWidget):
         start_dir = None
         if self.image_sequence_path:
             start_dir = os.path.dirname(self._browse_widget.get_path())
-        (
-            file_path,
-            unused_selected_filter,
-        ) = QtWidgets.QFileDialog.getOpenFileName(
-            caption='Choose image sequence',
-            dir=start_dir,
-            filter='Images (*.cin *.dng *.dpx *.dtex *.gif *.bmp *.float *.pcx '
+
+        dialog_filter = (
+            'Images (*.cin *.dng *.dpx *.dtex *.gif *.bmp *.float *.pcx '
             '*.png *.psd *.tga *.jpeg *.jpg *.exr *.dds *.hdr *.hdri *.cgi '
-            '*.tif *.tiff *.tga *.targa *.yuv);;All files (*)',
+            '*.tif *.tiff *.tga *.targa *.yuv);;All files (*)'
         )
-
-        if not file_path:
-            return
-
-        file_path = os.path.normpath(file_path)
-
-        image_sequence_path = core_utils.find_image_sequence(file_path)
-
-        if not image_sequence_path:
-            dialog.ModalDialog(
-                None,
-                title='Locate image sequence',
-                message='An image sequence on the form "prefix.NNNN.ext" were not '
-                'found at {}!'.format(file_path),
-            )
-
-        self.image_sequence_path = image_sequence_path
-        #self.report_input()
-
-    # def report_input(self):
-    #     '''(Override) Amount of collected objects has changed, notify parent(s)'''
-    #     message = ""
-    #     status = False
-    #     name, widget, inner_widget = self.rbg.get_checked_button()
-    #     if name == "render_create_write":
-    #         if self._nodes_cb.isEnabled() and self._nodes_cb.count() > 0:
-    #             message = '1 script node selected'
-    #             status = True
-    #         else:
-    #             message = 'No script node selected!'
-    #     elif name == "render_selected":
-    #         if (
-    #             self._write_nodes_cb.isEnabled()
-    #             and self._write_nodes_cb.count() > 0
-    #         ):
-    #             message = '1 write node selected'
-    #             status = True
-    #         else:
-    #             message = 'No write node selected!'
-    #     elif name == "pickup":
-    #         if self.image_sequence_path:
-    #             message = '1 image sequence selected'
-    #             status = True
-    #         else:
-    #             message = 'No image sequence selected'
-    #
-    #     self.inputChanged.emit(
-    #         {
-    #             'status': status,
-    #             'message': message,
-    #         }
-    #     )
+        dialog_result = file_dialog.ImageSequenceFileDialog(
+            start_dir, dialog_filter
+        )
+        self.image_sequence_path = dialog_result.path
 
 
 class NukeSequencePublisherCollectorPluginWidget(

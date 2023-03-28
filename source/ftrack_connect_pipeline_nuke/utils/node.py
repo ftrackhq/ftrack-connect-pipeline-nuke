@@ -55,17 +55,17 @@ def clean_selection():
 
 
 def get_path_from_image_sequence_write_node(node_name):
-    ''' Extract path from the write node '''
+    '''Extract path from the write node'''
     full_path = None
     if not node_name:
         return full_path
     node = nuke.toNode(node_name)
 
     if (
-            not node.Class() == 'Write'
-            and node.knob('file')
-            and node.knob('first')
-            and node.knob('last')
+        not node.Class() == 'Write'
+        and node.knob('file')
+        and node.knob('first')
+        and node.knob('last')
     ):
         return full_path
 

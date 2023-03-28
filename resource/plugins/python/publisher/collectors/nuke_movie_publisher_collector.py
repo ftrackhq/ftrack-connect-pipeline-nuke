@@ -22,13 +22,15 @@ class NukeMoviePublisherCollectorPlugin(plugin.NukePublisherCollectorPlugin):
         if len(selected_nodes) == 0:
             selected_nodes = nuke.allNodes()
 
-        self.supported_file_formats = options.get("supported_file_formats") or self.supported_file_formats
+        self.supported_file_formats = (
+            options.get("supported_file_formats")
+            or self.supported_file_formats
+        )
 
         # filter selected_nodes to match classname given by options
         if options.get('classname'):
             selected_nodes = self.filter_by_class_name(
-                selected_nodes,
-                options.get('classname')
+                selected_nodes, options.get('classname')
             )
 
         node_names = self.classify_supported_write_nodes(selected_nodes)

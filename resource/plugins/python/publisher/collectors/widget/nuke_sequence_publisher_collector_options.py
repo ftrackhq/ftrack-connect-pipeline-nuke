@@ -6,7 +6,10 @@ import ftrack_api
 
 from ftrack_connect_pipeline_qt.plugin.widget import BaseOptionsWidget
 from ftrack_connect_pipeline_qt.ui.utility.widget import (
-    radio_button_group, browse_widget, node_combo_box, file_dialog
+    radio_button_group,
+    browse_widget,
+    node_combo_box,
+    file_dialog,
 )
 from ftrack_connect_pipeline_nuke import plugin
 from ftrack_connect_pipeline_nuke import utils as nuke_utils
@@ -64,9 +67,7 @@ class NukeSequencePublisherCollectorOptionsWidget(BaseOptionsWidget):
         self._nodes_cb.add_items(node_names, self._node_name)
         self._nodes_cb.hide_warning()
         if not node_names:
-            self._nodes_cb.show_warning(
-                "No selected nodes!"
-            )
+            self._nodes_cb.show_warning("No selected nodes!")
 
     @property
     def write_node_names(self):
@@ -88,7 +89,9 @@ class NukeSequencePublisherCollectorOptionsWidget(BaseOptionsWidget):
         node_name = None
         if not self._node_name and self.write_node_names:
             node_name = self.write_node_names[0]
-        self.image_sequence_path = nuke_utils.get_path_from_image_sequence_write_node(node_name)
+        self.image_sequence_path = (
+            nuke_utils.get_path_from_image_sequence_write_node(node_name)
+        )
 
     def __init__(
         self,
@@ -124,19 +127,15 @@ class NukeSequencePublisherCollectorOptionsWidget(BaseOptionsWidget):
         self.rbg.add_button(
             'render_create_write',
             'Create write node at selected node:',
-            self._nodes_cb
+            self._nodes_cb,
         )
         self._write_nodes_cb = node_combo_box.NodeComboBox()
         self.rbg.add_button(
-            'render_selected',
-            'Render selected node:',
-            self._write_nodes_cb
+            'render_selected', 'Render selected node:', self._write_nodes_cb
         )
         self._browse_widget = browse_widget.BrowseWidget()
         self.rbg.add_button(
-            'pickup',
-            'Pick up rendered image sequence:',
-            self._browse_widget
+            'pickup', 'Pick up rendered image sequence:', self._browse_widget
         )
 
         self.layout().addWidget(self.rbg)
@@ -149,7 +148,6 @@ class NukeSequencePublisherCollectorOptionsWidget(BaseOptionsWidget):
             self.set_option_result(
                 'render_create_write', 'mode'
             )  # Set default mode
-
 
     def post_build(self):
         super(NukeSequencePublisherCollectorOptionsWidget, self).post_build()

@@ -8,7 +8,10 @@ import ftrack_api
 
 from ftrack_connect_pipeline_qt.plugin.widget import BaseOptionsWidget
 from ftrack_connect_pipeline_qt.ui.utility.widget import (
-    radio_button_group, browse_widget, node_combo_box, file_dialog
+    radio_button_group,
+    browse_widget,
+    node_combo_box,
+    file_dialog,
 )
 from ftrack_connect_pipeline_nuke import plugin
 
@@ -99,9 +102,7 @@ class NukeMoviePublisherCollectorOptionsWidget(BaseOptionsWidget):
         self._nodes_cb.add_items(node_names, self._node_name)
         self._nodes_cb.hide_warning()
         if not node_names:
-            self._nodes_cb.show_warning(
-                "No selected nodes!"
-            )
+            self._nodes_cb.show_warning("No selected nodes!")
 
     @property
     def write_node_names(self):
@@ -116,9 +117,7 @@ class NukeMoviePublisherCollectorOptionsWidget(BaseOptionsWidget):
 
         self._write_nodes_cb.hide_warning()
         if not node_names:
-            self._write_nodes_cb.show_warning(
-                "No movie write node selected!"
-            )
+            self._write_nodes_cb.show_warning("No movie write node selected!")
 
         node_name = None
         if not self._node_name and self.write_node_names:
@@ -164,25 +163,21 @@ class NukeMoviePublisherCollectorOptionsWidget(BaseOptionsWidget):
         self.rbg.add_button(
             'render_create_write',
             'Create write node at selected node:',
-            self._nodes_cb
+            self._nodes_cb,
         )
         self._write_nodes_cb = node_combo_box.NodeComboBox()
         self.rbg.add_button(
-            'render_selected',
-            'Render selected node:',
-            self._write_nodes_cb
+            'render_selected', 'Render selected node:', self._write_nodes_cb
         )
         self._browse_image_sequence_widget = browse_widget.BrowseWidget()
         self.rbg.add_button(
             'render_from_sequence',
             'Render movie from existing image sequence:',
-            self._browse_image_sequence_widget
+            self._browse_image_sequence_widget,
         )
         self._browse_widget = browse_widget.BrowseWidget()
         self.rbg.add_button(
-            'pickup',
-            'Pick up rendered movie:',
-            self._browse_widget
+            'pickup', 'Pick up rendered movie:', self._browse_widget
         )
 
         self.layout().addWidget(self.rbg)
@@ -225,7 +220,10 @@ class NukeMoviePublisherCollectorOptionsWidget(BaseOptionsWidget):
         if inner_widget in [self._nodes_cb, self._write_nodes_cb]:
             self._on_node_selected(inner_widget.get_text())
         else:
-            if mode_name == 'render_from_sequence'and not self.image_sequence_path:
+            if (
+                mode_name == 'render_from_sequence'
+                and not self.image_sequence_path
+            ):
                 report_status = False
                 report_message = 'No image sequence selected'
                 self.inputChanged.emit(
@@ -298,9 +296,7 @@ class NukeMoviePublisherCollectorOptionsWidget(BaseOptionsWidget):
             start_dir = os.path.dirname(self._movie_path_le.text())
 
         dialog_filter = 'Movies (*.mov *.r3d *.mxf *.avi);;All files (*)'
-        dialog_result = file_dialog.MovieFileDialog(
-            start_dir, dialog_filter
-        )
+        dialog_result = file_dialog.MovieFileDialog(start_dir, dialog_filter)
         self.movie_path = dialog_result.path
 
 

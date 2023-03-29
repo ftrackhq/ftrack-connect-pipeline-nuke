@@ -170,6 +170,9 @@ class NukeSequencePublisherCollectorOptionsWidget(BaseOptionsWidget):
     def refresh_nodes(self):
         ''' Run fetch function '''
         self.on_run_plugin(method="fetch")
+        name, widget, inner_widget = self.rbg.get_checked_button()
+        if name:
+            self.set_mode(name, widget, inner_widget)
 
     def set_mode(self, mode_name, widget, inner_widget):
         ''' Set up the mode of the widget '''

@@ -64,6 +64,10 @@ class NukeNodePublisherCollectorOptionsWidget(BaseOptionsWidget):
             self.nodes_cb.add_items(self.node_names)
         self.report_input()
 
+    def refresh_nodes(self):
+        ''' Run fetch function '''
+        self.on_run_plugin(method="fetch")
+
     def _on_node_selected(self, node_name):
         if len(node_name) > 0:
             self.set_option_result(node_name, 'node_name')
@@ -76,6 +80,8 @@ class NukeNodePublisherCollectorOptionsWidget(BaseOptionsWidget):
         self.nodes_cb.text_changed.connect(self._on_node_selected)
         if self.node_names:
             self._on_node_selected(self.nodes_cb.get_text())
+
+        self.nodes_cb.refresh_clicked.connect(self.refresh_nodes)
 
     def report_input(self):
         '''(Override) Amount of collected objects has changed, notify parent(s)'''
